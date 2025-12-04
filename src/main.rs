@@ -1,11 +1,20 @@
 use advent_of_code_2025::days;
+use std::fs;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let day = 1;
-    let input = std::fs::read_to_string(format!("src/inputs/day{}.txt", day))?;
-
-    println!("Day 1, Part 1: {}", days::day1::solve_part1(&input)?);
-    println!("Day 1, Part 2: {}", days::day1::solve_part2(&input)?);
+    for day in 1..=2 {
+        let input = fs::read_to_string(format!("src/inputs/day{}.txt", day))?;
+        match day {
+            1 => {
+                println!("Day 1, Part 1: {}", days::day1::solve_part1(&input)?);
+                println!("Day 1, Part 2: {}", days::day1::solve_part2(&input)?);
+            }
+            2 => {
+                println!("Day 2, Part 1: {}", days::day2::solve_part1(&input)?);
+            }
+            _ => {}
+        }
+    }
 
     Ok(())
 }
