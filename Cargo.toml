@@ -1,6 +1,6 @@
-[workspace]
-resolver = "2"
-members = [
-  "day-1/part-1",
-]
+[package]
+name = "advent-of-code-2025"
+version = "0.1.0"
+edition = "2024"
 
+[dependencies]
