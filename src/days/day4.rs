@@ -1,5 +1,3 @@
-use std::result;
-
 pub fn solve_part1(input: &str) -> Result<i32, Box<dyn std::error::Error>> {
     let lines: Vec<Vec<char>> = input.lines().map(|l| l.chars().collect()).collect();
 
