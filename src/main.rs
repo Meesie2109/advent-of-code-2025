@@ -27,6 +27,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             }
             6 => {
                 println!("Day 6, Part 1: {}", days::day6::solve_part1(&input)?);
+                println!("Day 6, Part 2: {}", days::day6::solve_part2(&input)?)
             }
             _ => {}
         }
