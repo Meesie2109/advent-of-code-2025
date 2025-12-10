@@ -148,6 +148,3 @@ pub fn solve_part2(input: &str) -> Result<i64, Box<dyn std::error::Error>> {
 
     Ok(result)
 }
-
-// 409176996966;
-// 10951882745757

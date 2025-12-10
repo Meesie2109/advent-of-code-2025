@@ -2,7 +2,7 @@ use advent_of_code_2025::days;
 use std::fs;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    for day in 1..=6 {
+    for day in 1..=7 {
         let input = fs::read_to_string(format!("src/inputs/day{}.txt", day))?;
         match day {
             1 => {
@@ -27,7 +27,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             }
             6 => {
                 println!("Day 6, Part 1: {}", days::day6::solve_part1(&input)?);
-                println!("Day 6, Part 2: {}", days::day6::solve_part2(&input)?)
+                println!("Day 6, Part 2: {}", days::day6::solve_part2(&input)?);
+            }
+            7 => {
+                println!("Day 7, Part 1: {}", days::day7::solve_part1(&input)?);
             }
             _ => {}
         }
