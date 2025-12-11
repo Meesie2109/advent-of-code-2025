@@ -13,8 +13,6 @@ pub fn solve_part1(input: &str) -> Result<i64, Box<dyn std::error::Error>> {
         } else {
             let mut new_positions: Vec<usize> = Vec::new();
             for p in &positions {
-                println!("found ={:#?}", line[*p] == '^');
-
                 if line[*p] == '^' {
                     count += 1;
                     if !new_positions.contains(&(p - 1)) {
