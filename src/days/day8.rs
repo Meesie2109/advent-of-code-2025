@@ -1,55 +1,94 @@
-use std::collections::BTreeMap;
+use std::{collections::BTreeMap, num::ParseIntError};
 
 pub fn solve_part1(input: &str) -> Result<i64, Box<dyn std::error::Error>> {
-    let lines: Vec<Vec<i64>> = input
-        .lines()
-        .map(|l| {
-            l.split(',')
-                .map(|n| n.parse::<i64>().unwrap_or(0))
-                .collect()
-        })
-        .collect();
+    let (_, mut peers, mut map) = parse_and_prepare(input)?;
 
-    let mut peers: Vec<Vec<usize>> = Vec::new();
-    let mut map: BTreeMap<i64, (usize, usize)> = BTreeMap::new();
+    merge_until(&mut peers, &mut map, 1000, |_, _, _group_count| None);
 
-    for (i, _) in lines.iter().enumerate() {
-        peers.push(vec![i]);
-    }
+    let mut sorted = peers.clone();
+    sorted.sort_by(|a, b| b.len().cmp(&a.len()));
+    Ok(sorted.iter().take(3).map(|g| g.len()).product::<usize>() as i64)
+}
 
-    get_peer_map(&lines, &mut map);
+pub fn solve_part2(input: &str) -> Result<i64, Box<dyn std::error::Error>> {
+    let (lines, mut peers, mut map) = parse_and_prepare(input)?;
 
-    for _ in 0..1000 {
-        if let Some((_, value)) = map.pop_first() {
-            let (a, b) = value;
+    let mut result = 0;
 
-            let group_a_idx =
-                find_group_index(&peers, a).ok_or("Something went wrong during index lookup")?;
-            let group_b_idx =
-                find_group_index(&peers, b).ok_or("Something went wrong during index lookup")?;
+    merge_until(&mut peers, &mut map, usize::MAX, |a, b, group_count| {
+        if group_count == 1 {
+            result = lines[a][0] * lines[b][0];
+            Some(result)
+        } else {
+            None
+        }
+    });
 
-            if group_a_idx != group_b_idx {
-                let (low_idx, high_idx) = if group_a_idx < group_b_idx {
-                    (group_a_idx, group_b_idx)
-                } else {
-                    (group_b_idx, group_a_idx)
-                };
+    Ok(result)
+}
 
-                let (left, right) = peers.split_at_mut(high_idx);
-                left[low_idx].append(&mut right[0]);
-                peers.remove(high_idx);
-                continue;
+fn merge_until<F>(
+    peers: &mut Vec<Vec<usize>>,
+    map: &mut BTreeMap<i64, (usize, usize)>,
+    max_steps: usize,
+    mut callback: F,
+) where
+    F: FnMut(usize, usize, usize) -> Option<i64>,
+{
+    for _ in 0..max_steps {
+        if let Some((_, (a, b))) = map.pop_first() {
+            let ga = match find_group_index(peers, a) {
+                Some(idx) => idx,
+                None => continue,
+            };
+            let gb = match find_group_index(peers, b) {
+                Some(idx) => idx,
+                None => continue,
+            };
+
+            if ga != gb {
+                let (low, high) = if ga < gb { (ga, gb) } else { (gb, ga) };
+
+                let (left, right) = peers.split_at_mut(high);
+                left[low].append(&mut right[0]);
+                peers.remove(high);
+
+                let group_count = peers.len();
+
+                if let Some(_) = callback(a, b, group_count) {
+                    return;
+                }
             }
         }
     }
+}
 
-    let answer = {
-        let mut sorted = peers.clone();
-        sorted.sort_by(|a, b| b.len().cmp(&a.len()));
-        sorted.iter().take(3).map(|g| g.len()).product::<usize>()
-    } as i64;
+fn parse_and_prepare(
+    input: &str,
+) -> Result<
+    (
+        Vec<Vec<i64>>,
+        Vec<Vec<usize>>,
+        BTreeMap<i64, (usize, usize)>,
+    ),
+    Box<dyn std::error::Error>,
+> {
+    let mut lines = Vec::new();
 
-    Ok(answer)
+    for (i, line) in input.lines().enumerate() {
+        let numbers: Result<Vec<i64>, ParseIntError> =
+            line.split(',').map(|n| n.trim().parse::<i64>()).collect();
+
+        let numbers = numbers.map_err(|e| format!("Failed to parse line {}: {}", i + 1, e))?;
+        lines.push(numbers);
+    }
+
+    let peers = (0..lines.len()).map(|i| vec![i]).collect();
+
+    let mut map = BTreeMap::new();
+    get_peer_map(&lines, &mut map);
+
+    Ok((lines, peers, map))
 }
 
 fn find_group_index(peers: &Vec<Vec<usize>>, point: usize) -> Option<usize> {
